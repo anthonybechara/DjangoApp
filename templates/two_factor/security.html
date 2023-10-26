@@ -1,0 +1,63 @@
+{% extends 'registration/base.html' %}
+
+{% block title %}
+    Disable Two_factor
+{% endblock %}
+
+{% block body %}
+
+    {% if totp_devices %}
+        <section class="authenticator-app">
+            <h3>Deactivate Authenticator App:</h3>
+            <form method="post" action="{% url 'user:totp_disable' user.pk %}">
+                {% csrf_token %}
+                <button class="btn btn-danger btn-block mt-3" type="submit">
+                    Disable Two-Factor Authentication Using Authenticator App
+                </button>
+            </form>
+        </section>
+        <hr>
+    {% endif %}
+
+    {% if email_devices %}
+        <section class="email-verification">
+            <h3>Deactivate Email Verification:</h3>
+            <form method="post" action="{% url 'user:email_disable' user.pk %}">
+                {% csrf_token %}
+                <button class="btn btn-danger btn-block mt-3" type="submit">
+                    Disable Two-Factor Authentication Using Email
+                </button>
+            </form>
+        </section>
+        <hr>
+    {% endif %}
+
+        {% if phone_devices %}
+        <section class="phone-verification">
+            <h3>Deactivate Phone Number Verification:</h3>
+            <form method="post" action="{% url 'user:phone_disable' user.pk %}">
+                {% csrf_token %}
+                <button class="btn btn-danger btn-block mt-3" type="submit">
+                    Disable Two-Factor Authentication Using Phone Number
+                </button>
+            </form>
+        </section>
+        <hr>
+    {% endif %}
+
+    {% if static_devices %}
+        <section class="backup-codes">
+            <h3>Deactivate Backup Codes:</h3>
+            <form method="post" action="{% url 'user:static_disable' user.pk %}">
+                {% csrf_token %}
+                <button class="btn btn-danger btn-block mt-3" type="submit">
+                    Disable Two-Factor Authentication Using Backup Codes
+                </button>
+            </form>
+        </section>
+        <hr>
+    {% endif %}
+
+    <a class="btn btn-secondary btn-block mt-3" href="{% url 'two_factor:profile' %}">Back</a>
+
+{% endblock %}

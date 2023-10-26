@@ -1,0 +1,200 @@
+{% extends 'registration/base.html' %}
+{% load static %}
+{% load mathfilters %}
+
+{% block body %}
+
+    {% if not post_list %}
+    <h1>No Posts Yet</h1>
+    {% else %}
+
+    {% include 'post/pagination.html' with page_obj=page_obj %}
+
+    {% for post in post_list %}
+        <div class="container mt-4">
+            <div class="card shadow">
+                <div class="card-header d-flex align-items-center justify-content-between bg-primary text-white">
+                    <div class="user-profile d-flex align-items-center">
+                        <img height="50px" width="50px" src="{{ post.user.photo.url }}" alt="User Image"
+                             class="rounded-circle mr-2">
+                        <h5 class="mb-0">{{ post.user }}</h5>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <img height="500px" width="500px" src="{{ post.img.url }}" alt="Post Image"
+                         class="img-fluid rounded">
+                    <p class="text-muted mb-0"><small>Posted on: {{ post.created|date:"F d, Y - H:i" }}</small></p>
+                    <div class="post-details mt-3">
+                        <p class="mb-0"><strong>Caption:</strong> {{ post.caption }}</p>
+
+                        <p id="{{ post.slug }}_likes-info" class="mb-0">
+                            <strong>Likes:</strong>
+                            {% if post.like.count == 0 %}
+                                No likes yet
+                            {% elif post.like.count == 1 %}
+                                Liked by {{ post.like.first }}
+                            {% elif post.like.count == 2 %}
+                                Liked by {{ post.like.all|random }} and {{ post.like.count|sub:1 }} other
+                            {% else %}
+                                Liked by {{ post.like.all|random }} and {{ post.like.count|sub:1 }} others
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <!-- Like Button -->
+                    <div class="like-button mt-3">
+                        <button type="button" id="{{ post.slug }}_like-button"
+                                class="btn {% if user in post.like.all %}btn-primary{% else %}btn-outline-primary{% endif %} btn-like">
+                            {% if user in post.like.all %}
+                                Liked
+                            {% else %}
+                                Like
+                            {% endif %}
+                        </button>
+                    </div>
+
+                    <!-- Comments Section -->
+                    <div id="{{ post.slug }}_comments" class="comments mt-4">
+                        <h4 class="mb-3">Comments:</h4>
+                        {% if post.comments.all %}
+                            {% for comment in post.comments.all %}
+                                <div data-comment-id="{{ comment.id }}" data-post-id="{{ post.slug }}"
+                                     class="comment mb-2">
+                                    <!-- Comment Content, User Info, and Controls -->
+                                    <div class="d-flex align-items-center">
+                                        <!-- User Profile -->
+                                        <img height="30px" width="30px" src="{{ comment.user.photo.url }}"
+                                             alt="User Image" class="rounded-circle mr-2">
+                                        <div id="{{ post.slug }}_comment" class="flex-grow-1">
+                                            <p class="mb-0"><strong>{{ comment.user }}:</strong> {{ comment.content }}
+                                            </p>
+                                            <p class="text-muted mb-0">
+                                                <small>{{ comment.created_at|date:"F d, Y - H:i" }}</small></p>
+                                        </div>
+                                        <!-- Comment Controls for the Comment Owner -->
+                                        {% if request.user == comment.user %}
+                                            <button class="btn btn-edit-comment" data-comment-id="{{ comment.pk }}">
+                                                <b><i class="bi bi-pencil-square">Edit</i></b></button>
+                                            <div class="comment-edit-form" id="comment-edit-form-{{ comment.pk }}"
+                                                 style="display: none">
+                                                <!-- used without websocket-->
+                                                {#                                                <!-- <form method="post" action="{% url 'edit-comment' comment.pk %}">-->#}
+                                                <form method="post">
+                                                    {% csrf_token %}
+                                                    <label>
+                                                        <input class="form-control input-edit-comment"
+                                                               value="{{ comment.content }}"
+                                                               placeholder="Enter your comment" required>
+                                                    </label>
+                                                    <button type="submit"
+                                                            id="{{ post.slug }}_{{ comment.id }}_edit-button"
+                                                            class="btn btn-sm btn-primary btn-edit">Edit Comment
+                                                    </button>
+                                                    <button type="button"
+                                                            class="btn btn-sm btn-secondary btn-cancel-edit"
+                                                            data-comment-id="{{ comment.pk }}">Cancel
+                                                    </button>
+                                                </form>
+                                            </div>
+                                            <!-- used without websocket-->
+                                            <!-- <form class="delete-comment-form" method="POST"-->
+                                            {#                                            <!-- action="{% url 'delete-comment' comment.pk %}"> -->#}
+                                            <form class="delete-comment-form" method="POST">
+                                                {% csrf_token %}
+                                                <button id="{{ post.slug }}_{{ comment.id }}_delete-button"
+                                                        class="btn btn-delete-comment btn-delete"><b><i
+                                                        class="bi bi-pencil-square">X</i></b></button>
+                                            </form>
+                                        {% elif request.user == post.user %}
+                                            <!-- used without websocket-->
+                                            <!-- <form class="delete-comment-form" method="POST"-->
+                                            {#                                            <!-- action="{% url 'delete-comment' comment.pk %}"> -->#}
+                                            <form class="delete-comment-form" method="POST">
+                                                {% csrf_token %}
+                                                <button id="{{ post.slug }}_{{ comment.id }}_delete-button"
+                                                        class="btn btn-delete-comment btn-delete"><b><i
+                                                        class="bi bi-pencil-square">X</i></b></button>
+                                            </form>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+
+                            <div id="{{ post.slug }}_no_comments">
+                                <p class="mb-0">0 Comments</p>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="comment-form mt-4">
+                        <h4 class="mb-3">Leave a Comment</h4>
+                        <!-- used without websocket-->
+                        {#                        <!-- <form method="post" action="{% url 'create-comment' post.pk %}">-->#}
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="mb-0 d-flex align-items-center">
+                                <input name="{{ form.content.html_name }}" class="form-control input-comment"
+                                       id="{{ post.slug }}_input-comment" placeholder="Enter your comment" required>
+                            </div>
+                            <br>
+                            <button id="{{ post.slug }}_submit-comment" type="submit"
+                                    class="btn btn-primary btn-comment">Post Comment
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+
+
+    {% include 'post/pagination.html' with page_obj=page_obj %}
+
+    {% endif %}
+
+    {{ request.user.username|json_script:"json-username" }}
+
+    <script src="{% static 'js/likepost.js' %}"></script>
+    <script src="{% static 'js/commentpost.js' %}"></script>
+
+    {#    <script type="text/javascript">#}
+    {#        const EditComment = {}#}
+    {#        document.addEventListener("DOMContentLoaded", function () {#}
+    {#            const editButtons = document.querySelectorAll(".btn-edit-comment");#}
+    {#            const cancelButtons = document.querySelectorAll(".btn-cancel-edit");#}
+    {##}
+    {#            editButtons.forEach(button => {#}
+    {#                button.addEventListener("click", function () {#}
+    {#                    const commentId = button.getAttribute("data-comment-id");#}
+    {#                    const editForm = document.getElementById(`comment-edit-form-${commentId}`);#}
+    {#editForm.style.display = "block";#}
+    {#button.style.display = "none";#}
+    {#                    if (EditComment[commentId]) {#}
+    {#                        editForm.style.display = "none";#}
+    {#                        button.style.display = "block";#}
+    {#                        EditComment[commentId] = false;#}
+    {#                    } else {#}
+    {#                        editForm.style.display = "block";#}
+    {#                        EditComment[commentId] = true;#}
+    {#                        button.style.display = "none";#}
+    {##}
+    {#                    }#}
+    {#                });#}
+    {#            });#}
+    {##}
+    {#            cancelButtons.forEach(button => {#}
+    {#                button.addEventListener("click", function () {#}
+    {#                    const commentId = button.getAttribute("data-comment-id");#}
+    {#                    const editForm = document.getElementById(`comment-edit-form-${commentId}`);#}
+    {#                    editForm.style.display = "none";#}
+    {#                    EditComment[commentId] = false;#}
+    {#                    const editButton = document.querySelector(`.btn-edit-comment[data-comment-id="${commentId}"]`);#}
+    {#                    editButton.style.display = "block";#}
+    {#                });#}
+    {#            });#}
+    {#        });#}
+    {#    </script>#}
+
+
+{% endblock %}

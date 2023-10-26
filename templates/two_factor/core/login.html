@@ -1,0 +1,79 @@
+{% extends "two_factor/_base.html" %}
+{% load i18n %}
+{% load two_factor_tags %}
+
+{% block title %}{% trans "Login" %}{% endblock %}
+
+{% block extra_media %}
+    {{ form.media }}
+{% endblock %}
+
+{% block content %}
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card shadow">
+                    <div class="card-body">
+                        <h2 class="card-title text-center mb-4">{% trans "Sign In" %}</h2>
+                        <form action="" method="post">
+                            {% csrf_token %}
+
+                            {% if wizard.steps.current == 'token' %}
+                                <p>{{ device|as_verbose_action }}</p>
+                            {% elif wizard.steps.current == 'backup' %}
+                                <p>{% blocktrans trimmed %}Use this form to enter backup tokens for login.<br>
+                                    Please enter one of these backup tokens to log in to your
+                                    account.{% endblocktrans %}</p>
+                            {% endif %}
+
+                            <div class="form-group">
+                                {% include "two_factor/_wizard_forms.html" %}
+                            </div>
+
+                            <button class="btn btn-primary btn-block mt-3" type="submit">{% trans "Sign In" %}</button>
+                            {% include "two_factor/_wizard_actions.html" %}
+
+                            {% if other_devices %}
+                                <p>{% trans "Or, alternatively, use one of your other authentication methods:" %}</p>
+                                <p>
+                                    {% for other in other_devices %}
+                                        <button name="challenge_device" value="{{ other.persistent_id }}"
+                                                class="btn btn-secondary btn-block"
+                                                type="submit">{{ other|as_action }}</button>
+                                        <br>
+                                        <br>
+                                    {% endfor %}
+                                </p>
+                            {% endif %}
+
+                            {% if backup_tokens %}
+                                <hr>
+                                <div class="backup_tokens_form">
+                                    <form action="" method="post">
+                                        {% csrf_token %}
+                                        <p>
+                                            <button name="wizard_goto_step" type="submit" value="backup"
+                                                    class="btn btn-secondary btn-block">{% trans "Use Backup Token" %}</button>
+                                        </p>
+                                    </form>
+                                </div>
+                            {% endif %}
+                        </form>
+
+                        {% if wizard.steps.current == 'auth' %}
+                            <div class="mt-3 text-center">
+                                <a class="btn btn-link"
+                                   href="{% url 'user:password_reset' %}">{% trans "Forgot Password?" %}</a>
+                            </div>
+                            <hr class="my-4">
+                            <p class="text-center">
+                                {% trans "Don't have an account?" %} <a
+                                    href="{% url 'user:signup' %}">{% trans "Sign Up" %}</a>
+                            </p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

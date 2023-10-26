@@ -1,0 +1,165 @@
+{% extends 'registration/base.html' %}
+
+{% load static %}
+
+{% block body %}
+    <div class="container mt-4">
+        <div class="row">
+
+            <div class="col-md-8">
+                <div class="chat-box">
+                    <div class="chat-header">
+                        {% for participant in participants %}
+                            {% if participant != request.user %}
+                                <div class="participant-container">
+                                    <img height="50px" width="50px" src="{{ participant.photo.url }}"
+                                         alt="User Image"
+                                         class="rounded-circle mr-2">
+                                    <div>
+                                        {{ participant.first_name }} {{ participant.last_name }}
+                                        {{ participant.last_logout|time:"g:i A"|json_script:"json-last_logout" }}
+                                        {% if participant.is_online %}
+                                            <div id="{{ participant.username }}_status">
+                                                <small id="{{ participant.username }}_small">Online</small>
+                                            </div>
+                                        {% else %}
+                                            <div id="{{ participant.username }}_status">
+                                                <small id="{{ participant.username }}_small">Last
+                                                    Seen {{ participant.last_logout|time:"g:i A" }}</small>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    <div id="chat-messages" class="chat-messages">
+                        {% for message in messages %}
+                            <div class="message {% if message.sender == request.user %}right{% else %}left{% endif %}">
+                                <span class="message-text {% if message.sender == request.user %}right{% else %}left{% endif %}">
+                                    {% if message.room.participants.count > 2 and message.sender != request.user %}
+                                        <strong>{{ message.sender.first_name }} {{ message.sender.last_name }}:</strong>
+                                    {% endif %}
+                                    {{ message.message }}
+                                </span>
+                                <div class="message-timestamp">{{ message.timestamp }}</div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="chat-input">
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="input-group">
+                                <input id="message-input" type="text" name="message" placeholder="Enter your message"
+                                       class="form-control">
+                                <div class="input-group-append">
+                                    <button id="send-button" type="submit" class="btn btn-primary">Send</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="user-list-box">
+                    <h3>Chat Rooms</h3>
+                    <div class="chat-messages">
+                        <ul>
+                            {% for room in chat_rooms %}
+                                {% if room.slug != chatroom.slug %}
+                                    {% if room.participants.count > 2 %}
+                                        <li data-room-id="{{ room.slug }}">
+                                            <a href="{% url 'chat:chatroom' slug=room.slug %}">
+                                                <div class="participant-info">
+                                                    {% for participant in room.participants.all %}
+                                                        {% if participant != request.user %}
+                                                            <img height="50px" width="50px"
+                                                                 src="{{ participant.photo.url }}"
+                                                                 alt="User Image"
+                                                                 class="rounded-circle mr-2">
+                                                            <span class="participant-name">{{ participant.first_name }} {{ participant.last_name }}</span>
+                                                            {#                                                            {% if not forloop.last %} {% endif %}#}
+                                                        {% endif %}
+                                                    {% endfor %}
+
+                                                    <div id="{{ room.slug }}_create-badge">
+                                                        {% for i in room_message_unseen %}
+                                                            {% if i.message__room_id == room.id %}
+                                                                <div id="{{ room.slug }}_count-badge"
+                                                                     class="count-badge">
+                                                                    {{ i.nbr }}
+                                                                </div>
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        </li>
+                                    {% else %}
+                                        {% for participant in room.participants.all %}
+                                            {% if participant != request.user %}
+                                                <li data-room-id="{{ room.slug }}">
+                                                    <a href="{% url 'chat:chatroom' slug=room.slug %}">
+                                                        <div class="participant-info">
+                                                            {% for participant in room.participants.all %}
+                                                                {% if participant != request.user %}
+                                                                    <img height="50px" width="50px"
+                                                                         src="{{ participant.photo.url }}"
+                                                                         alt="User Image"
+                                                                         class="rounded-circle mr-2">
+                                                                    <span class="participant-name">{{ participant.first_name }} {{ participant.last_name }}</span>
+                                                                {% endif %}
+                                                            {% endfor %}
+
+
+                                                            <div id="{{ room.slug }}_create-badge">
+                                                                {% for i in room_message_unseen %}
+                                                                    {% if i.message__room_id == room.id %}
+                                                                        <div id="{{ room.slug }}_count-badge"
+                                                                             class="count-badge">
+                                                                            {{ i.nbr }}
+                                                                        </div>
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                            </div>
+                                                        </div>
+                                                    </a>
+                                                </li>
+
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endif %}
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <a href="{% url 'chat:create-chat' %}" class="btn btn-secondary">New Chat/Group</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    {{ chatroom.slug|json_script:"json-chatroom-name" }}
+    {{ request.user.username|json_script:"json-username" }}
+    {{ request.user.first_name|json_script:"json-first-name" }}
+    {{ request.user.last_name|json_script:"json-last-name" }}
+    {{ participants.count|json_script:"json-participants_count" }}
+
+    <script>
+        let receivers = [];
+        {% for participant in participants %}
+            {% if participant != request.user %}
+                receivers.push("{{ participant.username }}");
+            {% endif %}
+        {% endfor %}
+    </script>
+    <script src="{% static 'js/message.js' %}"></script>
+    <script src="{% static 'js/online.js' %}"></script>
+    <script src="{% static 'js/notification.js' %}"></script>
+
+    <link rel="stylesheet" href="{% static 'css/index.css' %}">
+
+{% endblock %}

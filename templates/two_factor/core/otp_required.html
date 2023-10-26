@@ -1,0 +1,26 @@
+{% extends "two_factor/_base.html" %}
+{% load i18n %}
+
+{% block content %}
+  <h1>{% blocktrans %}Permission Denied{% endblocktrans %}</h1>
+
+  <section class="permission-denied-info">
+      <p>
+          {% blocktrans trimmed %}
+              The page you requested requires users to verify using two-factor authentication for security reasons. You need to enable these security features to access this page.
+          {% endblocktrans %}
+      </p>
+      <p>
+          {% blocktrans trimmed %}
+              Two-factor authentication is not enabled for your account. Enable it for enhanced account security.
+          {% endblocktrans %}
+      </p>
+  </section>
+
+  <section class="button-actions">
+      <a href="javascript:history.go(-1)" class="float-right btn btn-link">{% trans "Go back" %}</a>
+      <a href="{% url 'user:2fa_setup' %}" class="btn btn-primary">
+          {% trans "Enable Two-Factor Authentication" %}
+      </a>
+  </section>
+{% endblock %}

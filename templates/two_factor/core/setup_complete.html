@@ -1,0 +1,23 @@
+{% extends "two_factor/_base.html" %}
+{% load i18n %}
+
+{% block content %}
+    <h1>{% blocktrans %}Two-Factor Authentication Enabled{% endblocktrans %}</h1>
+
+    <p>
+        {% blocktrans trimmed %}
+            Congratulations, you've successfully enabled two-factor authentication for your account.
+        {% endblocktrans %}
+    </p>
+
+    {# Uncomment the following lines if you want to add a setup option or account recovery option. #}
+    {# <a href="{% url 'two_factor:setup' %}" class="btn btn-primary">{% trans "Setup Another Method" %}</a> #}
+    {# <br> #}
+    {# <p>{% blocktrans trimmed %}However, it might happen that you don't have access to #}
+    {# your primary token device. To enable account recovery, add a phone #}
+    {# number.{% endblocktrans %}</p> #}
+
+    <a href="{% url 'user:2fa_security' %}" class="float-right btn btn-success">
+        {% trans "Back to Account Security" %}
+    </a>
+{% endblock %}

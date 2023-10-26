@@ -1,0 +1,88 @@
+{{ wizard.management_form }}
+
+
+{#{{ wizard.form.as_table }}#}
+{% for field in wizard.form %}
+    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+    {% if field.name == 'username' %}
+        <input type="{{ field.field.widget.input_type }}"
+               name="{{ field.html_name }}"
+               class="form-control"
+               id="{{ field.id_for_label }}"
+               placeholder="Use your username, phone number, or email">
+    {% elif field.name == 'password' %}
+        <input type="{{ field.field.widget.input_type }}"
+               name="{{ field.html_name }}"
+               class="form-control"
+               id="{{ field.id_for_label }}"
+               placeholder="Enter your password">
+    {% elif field.name == 'otp_token' %}
+        <input type="{{ field.field.widget.input_type }}"
+               name="{{ field.html_name }}"
+               class="form-control"
+               id="{{ field.id_for_label }}"
+               placeholder="Enter The Token">
+    {% elif field.name == 'token' %}
+        <input type="{{ field.field.widget.input_type }}"
+               name="{{ field.html_name }}"
+               class="form-control"
+               id="{{ field.id_for_label }}"
+               placeholder="Enter The Token">
+            {% elif field.name == 'number' %}
+        <input type="{{ field.field.widget.input_type }}"
+               name="{{ field.html_name }}"
+               class="form-control"
+               id="{{ field.id_for_label }}"
+               placeholder="Enter Your Number">
+    {% elif field.name == 'remember_me' %}
+        <input type="{{ field.field.widget.input_type }}"
+               name="{{ field.html_name }}"
+               class="form-check-input"
+               id="{{ field.id_for_label }}">
+    {% elif field.name == 'remember' %}
+        <input type="{{ field.field.widget.input_type }}"
+               name="{{ field.html_name }}"
+               class="form-check-input"
+               id="{{ field.id_for_label }}">
+
+    {% elif field.name == 'method' %}
+        {% for choice in field.field.widget.choices %}
+            <div class="form-check">
+                <input type="radio"
+                       name="{{ field.html_name }}"
+                       value="{{ choice.0 }}"
+                       class="form-check-input"
+                       id="{{ field.id_for_label }}_{{ forloop.counter }}">
+                <label class="form-check-label" for="{{ field.id_for_label }}_{{ forloop.counter }}">
+                    {{ choice.1 }}
+                </label>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if field.errors %}
+        <ul class="errors">
+            {% for error in field.errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endfor %}
+
+
+{% if wizard.form.non_field_errors %}
+    <div class="alert alert-danger mt-3">
+        <ul>
+            {% for error in wizard.form.non_field_errors %}
+                <li>{{ error }}</li>
+                {% if error == 'This account is inactive.' %}
+                    <li><a href="{% url 'user:request_activation' %}">Request a
+                        new activation link.</a></li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}
+
+
+

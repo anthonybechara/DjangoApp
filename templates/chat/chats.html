@@ -1,0 +1,106 @@
+{% extends 'registration/base.html' %}
+{% load static %}
+{% block body %}
+
+    <div class="container mt-4">
+        <div class="row">
+
+            <div class="col-md-8">
+                <div class="chat-box">
+                    <div class="chat-header">
+                        <h2>Chat</h2>
+                    </div>
+                    <div class="chat-messages">
+                    </div>
+                    <a href="{% url 'chat:create-chat' %}" class="btn btn-primary btn-lg">New Chat/Group</a>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="user-list-box">
+                    <h3>Chat Rooms</h3>
+                    <div class="chat-messages">
+                        <ul>
+                            {% for room in chat_rooms %}
+                                {% if room.participants.count > 2 %}
+                                    <li data-room-id="{{ room.slug }}">
+                                        <a href="{% url 'chat:chatroom' slug=room.slug %}">
+                                            <div class="participant-info">
+                                                {% for participant in room.participants.all %}
+                                                    {% if participant != request.user %}
+                                                        <img height="50px" width="50px"
+                                                             src="{{ participant.photo.url }}"
+                                                             alt="User Image"
+                                                             class="rounded-circle mr-2">
+                                                        <span class="participant-name">{{ participant.first_name }} {{ participant.last_name }}</span>
+                                                        {#                                                        {% if not forloop.last %} {% endif %}#}
+                                                    {% endif %}
+                                                {% endfor %}
+
+                                                <div id="{{ room.slug }}_create-badge">
+                                                    {% for i in room_message_unseen %}
+                                                        {% if i.message__room_id == room.id %}
+                                                            {% if i.nbr > 0 %}
+                                                                <div id="{{ room.slug }}_count-badge"
+                                                                     class="count-badge">
+                                                                    {{ i.nbr }}
+                                                                </div>
+                                                            {% endif %}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                {% else %}
+                                    {% for participant in room.participants.all %}
+                                        {% if participant != request.user %}
+                                            <li data-room-id="{{ room.slug }}">
+                                                <a href="{% url 'chat:chatroom' slug=room.slug %}">
+                                                    <div class="participant-info">
+
+                                                        {% for participant in room.participants.all %}
+                                                            {% if participant != request.user %}
+                                                                <img height="50px" width="50px"
+                                                                     src="{{ participant.photo.url }}"
+                                                                     alt="User Image"
+                                                                     class="rounded-circle mr-2">
+                                                                <span class="participant-name">{{ participant.first_name }} {{ participant.last_name }}</span>
+                                                            {% endif %}
+                                                        {% endfor %}
+
+                                                        <div id="{{ room.slug }}_create-badge">
+                                                            {% for i in room_message_unseen %}
+                                                                {% if i.message__room_id == room.id %}
+                                                                    {% if i.nbr > 0 %}
+                                                                        <div id="{{ room.slug }}_count-badge"
+                                                                             class="count-badge">
+                                                                            {{ i.nbr }}
+                                                                        </div>
+                                                                    {% endif %}
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </div>
+                                                    </div>
+                                                </a>
+                                            </li>
+
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    {{ request.user.username|json_script:"json-username" }}
+
+    <script src="{% static 'js/notification.js' %}"></script>
+    <script src="{% static 'js/online.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'css/index.css' %}">
+
+{% endblock %}

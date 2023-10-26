@@ -1,0 +1,32 @@
+{% extends 'registration/base.html' %}
+
+{% block body %}
+    {% if not post_list %}
+        <h1>No Posts Yet</h1>
+        <a class="btn btn-primary" href="{% url 'post:create-post' %}">Create a new post</a>
+    {% else %}
+        <h1>Your Posts</h1>
+        <ul>
+        {% for post in post_list %}
+            <div class="container mt-4">
+                <div class="card shadow">
+                    <div class="card-body">
+                        <img height="500px" width="500px" src="{{ post.img.url }}" alt="Post Image"
+                             class="img-fluid rounded">
+                        <p class="text-muted mb-0"><small>Posted on: {{ post.created|date:"F d, Y - H:i" }}</small>
+                        </p>
+                        <p class="mb-0"><strong>Caption:</strong> {{ post.caption }}</p>
+                        <div class="post-actions mt-3">
+                            <a href="{% url 'post:delete-post' post.slug %}"
+                               class="btn btn-danger btn-sm mr-2">Delete</a>
+                            <a href="{% url 'post:edit-post' post.slug %}" class="btn btn-primary btn-sm">Update</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+
+    {% endif %}
+</ul>
+{% endblock %}
+

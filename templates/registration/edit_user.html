@@ -1,0 +1,118 @@
+{% extends 'registration/base.html' %}
+
+{% block title %}
+    Edit
+{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <form method="post" enctype="multipart/form-data" novalidate>
+                    {% csrf_token %}
+                    {% for field in user_form %}
+                        {% if field.name != 'password' %}
+                            <label for="{{ field.id_for_label }}">{{ field.label_tag }}</label>
+                            {% if field.name == 'first_name' %}
+                                <input type="{{ field.field.widget.input_type }}"
+                                       name="{{ field.html_name }}"
+                                       class="form-control"
+                                       id="{{ field.id_for_label }}"
+                                       value="{{ field.value }}"
+                                       placeholder="Enter your first name">
+                            {% elif field.name == 'last_name' %}
+                                <input type="{{ field.field.widget.input_type }}"
+                                       name="{{ field.html_name }}"
+                                       class="form-control"
+                                       id="{{ field.id_for_label }}"
+                                       value="{{ field.value }}"
+                                       placeholder="Enter your last name">
+                            {% elif field.name == 'username' %}
+                                <input type="{{ field.field.widget.input_type }}"
+                                       name="{{ field.html_name }}"
+                                       class="form-control"
+                                       id="{{ field.id_for_label }}"
+                                       value="{{ field.value }}"
+                                       placeholder="Enter your username">
+                            {% elif field.name == 'email' %}
+                                <input type="{{ field.field.widget.input_type }}"
+                                       name="{{ field.html_name }}"
+                                       class="form-control"
+                                       id="{{ field.id_for_label }}"
+                                       value="{{ field.value }}"
+                                       placeholder="Enter your email">
+                            {% elif field.name == 'phone_number' %}
+                                <input type="{{ field.field.widget.input_type }}"
+                                       name="{{ field.html_name }}"
+                                       class="form-control"
+                                       id="{{ field.id_for_label }}"
+                                       value="{{ field.value }}"
+                                       placeholder="Enter your phone number">
+                            {% elif field.name == 'middle_name' %}
+                                <input type="{{ field.field.widget.input_type }}"
+                                       name="{{ field.html_name }}"
+                                       class="form-control"
+                                       id="{{ field.id_for_label }}"
+                                       value="{{ field.value }}"
+                                       placeholder="Enter your middle name">
+                            {% elif field.name == 'birth_date' %}
+                                <input type="{{ field.field.widget.input_type }}"
+                                       name="{{ field.html_name }}"
+                                       class="form-control"
+                                       id="{{ field.id_for_label }}"
+                                       value="{{ field.value|date:'Y-m-d' }}">
+                            {% elif field.name == 'gender' %}
+                                <select name="{{ field.html_name }}"
+                                        class="form-control"
+                                        id="{{ field.id_for_label }}">
+                                    <option value="" {% if field.value == '' %}selected{% endif %}>Select your gender
+                                    </option>
+                                    <option value="male" {% if field.value == 'male' %}selected{% endif %}>Male</option>
+                                    <option value="female" {% if field.value == 'female' %}selected{% endif %}>Female
+                                    </option>
+                                </select>
+                            {% elif field.name == 'country' %}
+                                <input type="{{ field.field.widget.input_type }}"
+                                       name="{{ field.html_name }}"
+                                       class="form-control"
+                                       id="{{ field.id_for_label }}"
+                                       value="{{ field.value }}"
+                                       placeholder="Enter your country">
+                            {% elif field.name == 'city' %}
+                                <input type="{{ field.field.widget.input_type }}"
+                                       name="{{ field.html_name }}"
+                                       class="form-control"
+                                       id="{{ field.id_for_label }}"
+                                       value="{{ field.value }}"
+                                       placeholder="Enter your city">
+                            {% elif field.name == 'photo' %}
+                                <input type="file"
+                                       name="{{ field.html_name }}"
+                                       class="form-control"
+                                       id="{{ field.id_for_label }}"
+                                       value="{{ field.value }}">
+                                <div class="mt-3">
+                                    {% if user_form.instance.photo %}
+                                        <img height="150px" width="150px" src="{{ user_form.instance.photo.url }}"
+                                             alt="Chosen Image"
+                                             class="img-fluid mt-2">
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        {% endif %}
+                        {% if field.errors %}
+                            <ul class="errors">
+                                {% for error in field.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    {% endfor %}
+                    <br>
+                    <button type="submit" class="btn btn-primary">Update Profile</button>
+                    <a class="btn btn-secondary" href="{% url 'user:password_change' %}">Change Password</a>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

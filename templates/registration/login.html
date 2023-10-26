@@ -1,0 +1,109 @@
+{% extends 'registration/base.html' %}
+{% load i18n %}
+{% block title %}
+    Login
+{% endblock %}
+{{ wizard.form.media }}
+{% block body %}
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card shadow">
+                    <div class="card-body">
+                        <h2 class="card-title text-center mb-4">Sign In</h2>
+                        <form method="post" class="form-signin" novalidate>
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <form method="post" class="form-signin" novalidate>
+                                    {% csrf_token %}
+                                    <div class="form-group">
+                                        {{ wizard.management_form }}
+                                        {% for field in form %}
+                                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                            {% if field.name == 'username' %}
+                                                <input type="{{ field.field.widget.input_type }}"
+                                                       name="{{ field.html_name }}"
+                                                       class="form-control"
+                                                       id="{{ field.id_for_label }}"
+                                                       placeholder="Use your username, phone number, or email">
+                                            {% elif field.name == 'password' %}
+                                                <input type="{{ field.field.widget.input_type }}"
+                                                       name="{{ field.html_name }}"
+                                                       class="form-control"
+                                                       id="{{ field.id_for_label }}"
+                                                       placeholder="Enter your password">
+                                            {% elif field.name == 'remember_me' %}
+                                                <input type="{{ field.field.widget.input_type }}"
+                                                       name="{{ field.html_name }}"
+                                                       class="form-check-input"
+                                                       id="{{ field.id_for_label }}">
+                                            {% elif field.name == 'otp_token' %}
+                                                <input type="{{ field.field.widget.input_type }}"
+                                                       name="{{ field.html_name }}"
+                                                       class="form-control"
+                                                       id="{{ field.id_for_label }}"
+                                                       placeholder="Enter the generated token">
+
+                                                {##}
+                                                {#                                            {% elif field.name == 'otp_device' %}#}
+                                                {#                                                <input type="{{ field.field.widget.input_type }}"#}
+                                                {#                                                       name="{{ field.html_name }}"#}
+                                                {#                                                       class="form-control"#}
+                                                {#                                                       id="{{ field.id_for_label }}"#}
+                                                {#                                                       placeholder="Enter the generated token">#}
+                                                {#                                            {% elif field.name == 'otp_challenge' %}#}
+                                                {#                                                <input type="{{ field.field.widget.input_type }}"#}
+                                                {#                                                       name="{{ field.html_name }}"#}
+                                                {#                                                       class="form-control"#}
+                                                {#                                                       id="{{ field.id_for_label }}"#}
+                                                {#                                                       placeholder="Enter the generated token">#}
+
+                                            {% endif %}
+                                            {% if field.errors %}
+                                                <ul class="errors">
+                                                    {% for error in field.errors %}
+                                                        <li>{{ error }}</li>
+                                                    {% endfor %}
+                                                </ul>
+                                            {% endif %}
+                                        {% endfor %}
+                                        {% if wizard.form.non_field_errors %}
+                                            <div class="alert alert-danger mt-3">
+                                                <ul>
+                                                    {% for error in wizard.form.non_field_errors %}
+                                                        <li>{{ error }}</li>
+                                                        {% if error == 'This account is inactive.' %}
+                                                            <li><a href="{% url 'user:request_activation' %}">Request a
+                                                                new activation link.</a></li>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    {% if wizard.steps.prev %}
+                                        <button class="btn btn-secondary btn-block mt-3"
+                                                name="wizard_goto_step" type="submit"
+                                                value="{{ wizard.steps.prev }}">Cancel
+                                        </button>
+                                    {% endif %}
+                                    <button class="btn btn-primary btn-block mt-3" type="submit">Sign In</button>
+                                </form>
+                            </div>
+                        </form>
+                        {% if wizard.steps.current == "0" %}
+                            <div class="mt-3 text-center">
+                                <a class="btn btn-link" href="{% url 'user:password_reset' %}">Forgot Password?</a>
+                            </div>
+                            <hr class="my-4">
+                            <p class="text-center">
+                                Don't have an account? <a href="{% url 'user:signup' %}">Sign Up</a>
+                            </p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
